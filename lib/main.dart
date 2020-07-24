@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:tenupproductioncounter/screens/dashboard.dart';
+import 'package:tenupproductioncounter/screens/get_report_screen.dart';
 import 'package:tenupproductioncounter/screens/set_target_screen.dart';
+import 'package:tenupproductioncounter/screens/shift_settings_screen.dart';
 import 'package:tenupproductioncounter/screens/welcome_screen.dart';
 import 'package:tenupproductioncounter/screens/login_screen.dart';
 import 'package:tenupproductioncounter/screens/wifi_settings_screen.dart';
@@ -20,7 +22,9 @@ class MyApp extends StatelessWidget {
         LoginScreen.id: (context) => LoginScreen(),
         WifiSettingsScreen.id: (context) => WifiSettingsScreen(),
         Dashboard.id: (context) => Dashboard(),
-        SetTargetScreen.id: (context) => SetTargetScreen()
+        SetTargetScreen.id: (context) => SetTargetScreen(),
+        ShiftSettingsScreen.id: (context) => ShiftSettingsScreen(),
+        GetReportScreen.id: (context) => GetReportScreen(),
       },
 
     );

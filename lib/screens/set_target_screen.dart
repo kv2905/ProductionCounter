@@ -24,7 +24,6 @@ class _SetTargetScreenState extends State<SetTargetScreen> {
       body: Padding(
         padding: const EdgeInsets.all(32.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             DropdownButton<String>(

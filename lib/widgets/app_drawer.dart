@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:tenupproductioncounter/screens/get_report_screen.dart';
+import 'package:tenupproductioncounter/screens/shift_settings_screen.dart';
 import 'package:tenupproductioncounter/widgets/option_tile.dart';
 import 'package:tenupproductioncounter/screens/set_target_screen.dart';
 
@@ -48,7 +50,7 @@ class _AppDrawerState extends State<AppDrawer> {
               ),
               OptionTile(
                 onTap: () {
-                  Navigator.of(context).pop();
+                  Navigator.pushNamed(context, GetReportScreen.id);
                 },
                 optionName: 'Get Report',
               ),
@@ -60,7 +62,7 @@ class _AppDrawerState extends State<AppDrawer> {
               ),
               OptionTile(
                 onTap: () {
-                  Navigator.of(context).pop();
+                  Navigator.pushNamed(context, ShiftSettingsScreen.id);
                 },
                 optionName: 'Shift Settings',
               ),
