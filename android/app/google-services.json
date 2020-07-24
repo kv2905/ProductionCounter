@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "877865862932",
+    "firebase_url": "https://cloud-testing-321ea.firebaseio.com",
+    "project_id": "cloud-testing-321ea",
+    "storage_bucket": "cloud-testing-321ea.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:877865862932:android:1207aa0451826676c82401",
+        "android_client_info": {
+          "package_name": "com.tenuptech.tenupproductioncounter"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "877865862932-pm2d36be9sqk2mt55uujjgesdr64n5kq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCF3P5fNaMoPEuWIIqq4ATQXTIKzwHJOkI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "877865862932-pm2d36be9sqk2mt55uujjgesdr64n5kq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
