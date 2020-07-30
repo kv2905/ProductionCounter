@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tenupproductioncounter/widgets/app_drawer.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:tenupproductioncounter/widgets/display_card.dart';
+import 'package:tenupproductioncounter/widgets/line_display_card.dart';
 import 'package:firebase_database/firebase_database.dart';
 
 class Dashboard extends StatefulWidget {
@@ -13,16 +13,15 @@ class Dashboard extends StatefulWidget {
 class _DashboardState extends State<Dashboard> {
   final _auth = FirebaseAuth.instance;
   FirebaseUser loggedInUser;
-  List<DisplayCard> displayCards = [];
+  List<LineDisplayCard> displayCards = [];
 
   _fetchData() {
     DatabaseReference dbRef = FirebaseDatabase.instance.reference().child('Company1').child('line1');
     dbRef.once().then((DataSnapshot snap) {
       // ignore: non_constant_identifier_names
       var DATA = snap.value;
-      print(DATA['count']);
       displayCards.clear();
-      DisplayCard tempCard = DisplayCard(
+      LineDisplayCard tempCard = LineDisplayCard(
         line: 'Line1',
         target: 1000,
         done: DATA['count'],
@@ -31,7 +30,6 @@ class _DashboardState extends State<Dashboard> {
       );
       displayCards.add(tempCard);
       setState(() {
-        print(displayCards.length);
       });
     });
   }
@@ -44,7 +42,7 @@ class _DashboardState extends State<Dashboard> {
   }
 
   Widget _buildUI(int done) {
-    return DisplayCard(
+    return LineDisplayCard(
       line: 'Line1',
       tabColor: Colors.green,
       shift: 'Shift1',

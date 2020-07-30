@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:tenupproductioncounter/constants.dart';
 import 'package:tenupproductioncounter/widgets/circular_tab_indicator.dart';
 
-class DisplayCard extends StatelessWidget {
-  DisplayCard(
+class LineDisplayCard extends StatelessWidget {
+  LineDisplayCard(
       {this.onPress,
       this.line,
       this.left,

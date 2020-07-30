@@ -127,10 +127,8 @@ class _WifiSettingsScreenState extends State<WifiSettingsScreen> {
   }
 
   submitAction() {
-    var wifiSSID = '${wifiNameController.text}';
-    var wifiPWD = '${wifiPasswordController.text}';
-    writeData(wifiSSID);
-    writeData(wifiPWD);
+    var wifiDATA = '${wifiNameController.text},${wifiPasswordController.text}';
+    writeData(wifiDATA);
     targetDevice.disconnect();
     Navigator.pop(context);
   }

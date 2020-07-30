@@ -41,3 +41,5 @@ const kTestFieldDecorationForOneSidedBorders = InputDecoration(
     BorderSide(color: Colors.lightBlueAccent, width: 2.0),
   ),
 );
+
+const kTableHeadingStyles = TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white70);
