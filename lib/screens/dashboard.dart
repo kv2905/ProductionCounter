@@ -3,6 +3,7 @@ import 'package:tenupproductioncounter/widgets/app_drawer.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:tenupproductioncounter/widgets/line_display_card.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:intl/intl.dart';
 
 class Dashboard extends StatefulWidget {
   static const String id = 'dashboard';
@@ -14,6 +15,8 @@ class _DashboardState extends State<Dashboard> {
   final _auth = FirebaseAuth.instance;
   FirebaseUser loggedInUser;
   List<LineDisplayCard> displayCards = [];
+  DateTime updatedAt;
+  String updatedAtString;
 
   _fetchData() {
     DatabaseReference dbRef = FirebaseDatabase.instance.reference().child('Company1').child('line1');
@@ -39,6 +42,8 @@ class _DashboardState extends State<Dashboard> {
     super.initState();
     getCurrentUser();
     _fetchData();
+    updatedAt = DateTime.now();
+    updatedAtString = DateFormat('dd/MM/yyyy hh:mm:ss').format(updatedAt);
   }
 
   Widget _buildUI(int done) {
@@ -71,22 +76,33 @@ class _DashboardState extends State<Dashboard> {
         title: Text('Dashboard'),
       ),
       endDrawer: AppDrawer(),
-      body: Container(
-        child: displayCards.length == 0
-        ? Center(child: Text('Nothing to display'))
-        : ListView.builder(
-          itemCount: displayCards.length,
-          itemBuilder: (_, index) {
-            print(displayCards[index].done);
-            return _buildUI(displayCards[index].done);
-          }
-        )
+      body: Column(
+        children: [
+          Container(
+            height: 20,
+            child: Text('Last updated at $updatedAtString'),
+          ),
+          Expanded(
+            child: displayCards.length == 0
+            ? Center(child: Text('Nothing to display'))
+            : ListView.builder(
+              itemCount: displayCards.length,
+              itemBuilder: (_, index) {
+                return _buildUI(displayCards[index].done);
+              }
+            ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Color(0xFF42906A),
         child: Icon(Icons.refresh),
         onPressed: (){
           _fetchData();
+          setState(() {
+            updatedAt = DateTime.now();
+            updatedAtString = DateFormat('dd/MM/yyyy hh:mm:ss').format(updatedAt);
+          });
         },
       ),
     );

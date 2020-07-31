@@ -43,3 +43,5 @@ const kTestFieldDecorationForOneSidedBorders = InputDecoration(
 );
 
 const kTableHeadingStyles = TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white70);
+const kPickDateInGetReportScreenStyles = TextStyle(color: Colors.blueGrey, fontSize: 12);
+const kPickDateInSetTargetScreenStyles = TextStyle(color: Colors.white70, fontSize: 20);

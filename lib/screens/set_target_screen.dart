@@ -2,7 +2,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:tenupproductioncounter/constants.dart';
+import 'package:tenupproductioncounter/widgets/date_input_field.dart';
 import 'package:tenupproductioncounter/widgets/rounded_button.dart';
+import 'package:intl/intl.dart';
 
 class SetTargetScreen extends StatefulWidget {
   static const String id = 'set_target_screen';
@@ -14,10 +16,14 @@ class _SetTargetScreenState extends State<SetTargetScreen> {
   String line = 'Line 1';
   String shift = 'Shift 1';
   int target = 1000;
+  DateTime _date;
+  String dateString = 'Pick Date';
+  final nameHolder = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: Text('Set Target'),
       ),
@@ -25,6 +31,7 @@ class _SetTargetScreenState extends State<SetTargetScreen> {
         padding: const EdgeInsets.all(32.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             DropdownButton<String>(
               value: line,
@@ -79,6 +86,7 @@ class _SetTargetScreenState extends State<SetTargetScreen> {
             ),
             SizedBox(height: 25,),
             TextField(
+              controller: nameHolder,
               textAlign: TextAlign.center,
               keyboardType: TextInputType.number,
               onChanged: (value) {
@@ -89,11 +97,34 @@ class _SetTargetScreenState extends State<SetTargetScreen> {
               ),
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             ),
+            SizedBox(height: 25,),
+            DateInputField(
+              style: kPickDateInSetTargetScreenStyles,
+              type: dateString,
+              onTap: () {
+                showDatePicker(
+                  context: context,
+                  initialDate:
+                  _date == null ? DateTime.now() : _date,
+                  firstDate: DateTime(2001),
+                  lastDate: DateTime(2100),
+                ).then((date) {
+                  setState(() {
+                    _date = date;
+                    dateString = DateFormat('dd/MM/yyyy').format(date);
+                  });
+                });
+              },
+            ),
             SizedBox(height: 35,),
             RoundedButton(
               buttonName: 'Send',
               color: Colors.lightBlueAccent,
               onPressed: () {
+                nameHolder.clear();
+                setState(() {
+                  dateString = 'Pick Date';
+                });
               },
             )
           ],

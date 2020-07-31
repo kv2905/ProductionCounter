@@ -1,7 +1,13 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:tenupproductioncounter/constants.dart';
+import 'package:tenupproductioncounter/screens/pdf_preview_screen.dart';
 import 'package:tenupproductioncounter/widgets/rounded_button.dart';
 import 'package:intl/intl.dart';
 import 'package:tenupproductioncounter/widgets/date_input_field.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
 
 class GetReportScreen extends StatefulWidget {
   static const String id = 'get_report_screen';
@@ -12,6 +18,32 @@ class GetReportScreen extends StatefulWidget {
 class _GetReportScreenState extends State<GetReportScreen> {
   String line = 'Line 1', shift = 'Shift 1', from = 'from', to = 'to';
   DateTime _fromDate, _toDate;
+  final pdf = pw.Document();
+
+  _writeOnPdf() {
+    pdf.addPage(pw.MultiPage(
+        pageFormat: PdfPageFormat.a5,
+        margin: pw.EdgeInsets.all(32),
+        build: (pw.Context context) {
+          return <pw.Widget>[
+            pw.Header(
+              level: 0,
+              child: pw.Text('Production Counter Report'),
+            ),
+            pw.Paragraph(
+              text:
+                  'This is the pdf document of the production counter the data of the report generated will be represented here in tabular form.',
+            )
+          ];
+        }));
+  }
+
+  Future _savePdf() async {
+    Directory documentDirectory = await getApplicationDocumentsDirectory();
+    String documentPath = documentDirectory.path;
+    File file = File('$documentPath/report.pdf');
+    file.writeAsBytesSync(pdf.save());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +73,7 @@ class _GetReportScreenState extends State<GetReportScreen> {
                   line = newValue;
                 });
               },
-              items: <String>['Line 1', 'Line 2', 'Line 3', 'Line 4']
+              items: <String>['Line 1', 'Line 2', 'Line 3', 'Line 4', 'All']
                   .map<DropdownMenuItem<String>>((String value) {
                 return DropdownMenuItem<String>(
                   value: value,
@@ -69,7 +101,7 @@ class _GetReportScreenState extends State<GetReportScreen> {
                   shift = newValue;
                 });
               },
-              items: <String>['Shift 1', 'Shift 2', 'Shift 3', 'Shift 4']
+              items: <String>['Shift 1', 'Shift 2', 'Shift 3', 'Shift 4', 'All']
                   .map<DropdownMenuItem<String>>((String value) {
                 return DropdownMenuItem<String>(
                   value: value,
@@ -88,6 +120,7 @@ class _GetReportScreenState extends State<GetReportScreen> {
                   style: TextStyle(fontSize: 20),
                 ),
                 DateInputField(
+                  style: kPickDateInGetReportScreenStyles,
                   type: from,
                   onTap: () {
                     showDatePicker(
@@ -105,6 +138,7 @@ class _GetReportScreenState extends State<GetReportScreen> {
                   },
                 ),
                 DateInputField(
+                  style: kPickDateInGetReportScreenStyles,
                   type: to,
                   onTap: () {
                     showDatePicker(
@@ -128,7 +162,24 @@ class _GetReportScreenState extends State<GetReportScreen> {
             RoundedButton(
               buttonName: 'Generate',
               color: Colors.lightBlueAccent,
-              onPressed: () {},
+              onPressed: () async {
+                _writeOnPdf();
+                await _savePdf();
+
+                Directory documentDirectory =
+                    await getApplicationDocumentsDirectory();
+                String documentPath = documentDirectory.path;
+                String fullPath = '$documentPath/report.pdf';
+                print(fullPath);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => PdfPreviewScreen(
+                      path: fullPath,
+                    ),
+                  ),
+                );
+              },
             ),
           ],
         ),
