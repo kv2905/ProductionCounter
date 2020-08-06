@@ -1,3 +1,4 @@
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -19,6 +20,49 @@ class _SetTargetScreenState extends State<SetTargetScreen> {
   DateTime _date;
   String dateString = 'Pick Date';
   final nameHolder = TextEditingController();
+
+  _updateTarget(BuildContext context) {
+    if (target == 0 || target > 999999) {
+      _alertUser('Try Again!', 'Target can not be set to zero or more than 999999.');
+      nameHolder.clear();
+      setState(() {
+        dateString = 'Pick Date';
+      });
+      return;
+    }
+    DatabaseReference dbRef =
+        FirebaseDatabase.instance.reference().child('Company1').child('line1');
+    dbRef.update({'target': target}).then((_) {
+      nameHolder.clear();
+      _alertUser('', 'Target Updated!!');
+    }).catchError((onError) {
+      _alertUser('', 'Some error occurred!!');
+    });
+    setState(() {
+      dateString = 'Pick Date';
+    });
+  }
+
+  _alertUser(String title, String message) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: new Text(title),
+            content:
+                new Text(message),
+            actions: <Widget>[
+              // usually buttons at the bottom of the dialog
+              new FlatButton(
+                child: new Text("Close"),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +102,9 @@ class _SetTargetScreenState extends State<SetTargetScreen> {
                 );
               }).toList(),
             ),
-            SizedBox(height: 25,),
+            SizedBox(
+              height: 25,
+            ),
             DropdownButton<String>(
               value: shift,
               isExpanded: true,
@@ -84,7 +130,9 @@ class _SetTargetScreenState extends State<SetTargetScreen> {
                 );
               }).toList(),
             ),
-            SizedBox(height: 25,),
+            SizedBox(
+              height: 25,
+            ),
             TextField(
               controller: nameHolder,
               textAlign: TextAlign.center,
@@ -97,16 +145,17 @@ class _SetTargetScreenState extends State<SetTargetScreen> {
               ),
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             ),
-            SizedBox(height: 25,),
+            SizedBox(
+              height: 25,
+            ),
             DateInputField(
               style: kPickDateInSetTargetScreenStyles,
               type: dateString,
               onTap: () {
                 showDatePicker(
                   context: context,
-                  initialDate:
-                  _date == null ? DateTime.now() : _date,
-                  firstDate: DateTime(2001),
+                  initialDate: _date == null ? DateTime.now() : _date,
+                  firstDate: DateTime(2010),
                   lastDate: DateTime(2100),
                 ).then((date) {
                   setState(() {
@@ -116,15 +165,14 @@ class _SetTargetScreenState extends State<SetTargetScreen> {
                 });
               },
             ),
-            SizedBox(height: 35,),
+            SizedBox(
+              height: 35,
+            ),
             RoundedButton(
               buttonName: 'Send',
               color: Colors.lightBlueAccent,
               onPressed: () {
-                nameHolder.clear();
-                setState(() {
-                  dateString = 'Pick Date';
-                });
+                _updateTarget(context);
               },
             )
           ],

@@ -16,4 +16,12 @@ class ShiftsData extends ChangeNotifier {
     return _shifts.length;
   }
 
+  List<String> get shiftNames {
+    List<String> names = [];
+    for(int i=0; i<shiftCount; i++) {
+      names.add(_shifts[i].name);
+    }
+    return names;
+  }
+
 }

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:tenupproductioncounter/constants.dart';
@@ -19,23 +20,50 @@ class _GetReportScreenState extends State<GetReportScreen> {
   String line = 'Line 1', shift = 'Shift 1', from = 'from', to = 'to';
   DateTime _fromDate, _toDate;
   final pdf = pw.Document();
+  final dbRef =
+      FirebaseDatabase.instance.reference().child('Company1').child('line1');
+
+  _getDataFromFirebase() {
+    dbRef.once().then((DataSnapshot snap){
+      Map<dynamic, dynamic> values = snap.value;
+      values.forEach((key,values) {
+        print(values['count']);
+      });
+    });
+  }
 
   _writeOnPdf() {
-    pdf.addPage(pw.MultiPage(
+    pdf.addPage(
+      pw.MultiPage(
         pageFormat: PdfPageFormat.a5,
         margin: pw.EdgeInsets.all(32),
         build: (pw.Context context) {
           return <pw.Widget>[
             pw.Header(
               level: 0,
-              child: pw.Text('Production Counter Report'),
+              child: pw.Text('Production Counter Report',
+                  style: pw.TextStyle(fontSize: 20)),
             ),
-            pw.Paragraph(
-              text:
-                  'This is the pdf document of the production counter the data of the report generated will be represented here in tabular form.',
-            )
+            pw.Table.fromTextArray(data: <List<String>>[
+              <String>['Date', 'Time', 'Count'],
+              <String>['05/10/2020', '12:30', '135'],
+              <String>['05/10/2020', '12:30', '135'],
+              <String>['05/10/2020', '12:30', '135'],
+              <String>['05/10/2020', '12:30', '135'],
+              <String>['05/10/2020', '12:30', '135'],
+              <String>['05/10/2020', '12:30', '135'],
+              <String>['05/10/2020', '12:30', '135'],
+              <String>['05/10/2020', '12:30', '135'],
+              <String>['05/10/2020', '12:30', '135'],
+              <String>['05/10/2020', '12:30', '135'],
+              <String>['05/10/2020', '12:30', '135'],
+              <String>['05/10/2020', '12:30', '135'],
+              <String>['05/10/2020', '12:30', '135'],
+            ]),
           ];
-        }));
+        },
+      ),
+    );
   }
 
   Future _savePdf() async {
@@ -165,7 +193,7 @@ class _GetReportScreenState extends State<GetReportScreen> {
               onPressed: () async {
                 _writeOnPdf();
                 await _savePdf();
-
+                _getDataFromFirebase();
                 Directory documentDirectory =
                     await getApplicationDocumentsDirectory();
                 String documentPath = documentDirectory.path;

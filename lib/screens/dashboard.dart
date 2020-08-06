@@ -26,9 +26,9 @@ class _DashboardState extends State<Dashboard> {
       displayCards.clear();
       LineDisplayCard tempCard = LineDisplayCard(
         line: 'Line1',
-        target: 1000,
+        target: DATA['target'],
         done: DATA['count'],
-        left: 1000 - DATA['count'],
+        left: DATA['target'] - DATA['count'],
         tabColor: Colors.green,
       );
       displayCards.add(tempCard);
@@ -46,14 +46,14 @@ class _DashboardState extends State<Dashboard> {
     updatedAtString = DateFormat('dd/MM/yyyy hh:mm:ss').format(updatedAt);
   }
 
-  Widget _buildUI(int done) {
+  Widget _buildUI(int done, int target) {
     return LineDisplayCard(
       line: 'Line1',
       tabColor: Colors.green,
       shift: 'Shift1',
-      target: 1000,
+      target: target,
       done: done,
-      left: 1000-done<0 ? 0 : 1000-done,
+      left: target-done<0 ? 0 : target-done,
     );
   }
 
@@ -88,7 +88,7 @@ class _DashboardState extends State<Dashboard> {
             : ListView.builder(
               itemCount: displayCards.length,
               itemBuilder: (_, index) {
-                return _buildUI(displayCards[index].done);
+                return _buildUI(displayCards[index].done, displayCards[index].target);
               }
             ),
           ),
@@ -108,3 +108,5 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 }
+
+

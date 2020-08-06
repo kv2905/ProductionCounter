@@ -64,7 +64,7 @@ class LineDisplayCard extends StatelessWidget {
               height: 150.0,
               child: Row(
                 children: [
-                  _getCard(name: 'Target', number: 1000, color: Colors.lightBlueAccent),
+                  _getCard(name: 'Target', number: target, color: Colors.lightBlueAccent),
                   _getCard(name: 'Remaining', number: left, color: Colors.red),
                   _getCard(name: 'Completed', number: done, color: Colors.green)
                 ],
