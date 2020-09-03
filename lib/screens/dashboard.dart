@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tenupproductioncounter/screens/welcome_screen.dart';
 import 'package:tenupproductioncounter/widgets/app_drawer.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:tenupproductioncounter/widgets/line_display_card.dart';
@@ -70,40 +71,49 @@ class _DashboardState extends State<Dashboard> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: Text('Dashboard'),
-      ),
-      endDrawer: AppDrawer(),
-      body: Column(
-        children: [
-          Container(
-            height: 20,
-            child: Text('Last updated at $updatedAtString'),
+    return WillPopScope(
+      onWillPop: () async => false,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('Dashboard'),
+          centerTitle: true,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back_ios, size: 15),
+            onPressed: () {
+              Navigator.pushNamed(context, WelcomeScreen.id);
+            },
           ),
-          Expanded(
-            child: displayCards.length == 0
-            ? Center(child: Text('Nothing to display'))
-            : ListView.builder(
-              itemCount: displayCards.length,
-              itemBuilder: (_, index) {
-                return _buildUI(displayCards[index].done, displayCards[index].target);
-              }
+        ),
+        endDrawer: AppDrawer(),
+        body: Column(
+          children: [
+            Container(
+              height: 20,
+              child: Text('Last updated at $updatedAtString'),
             ),
-          ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Color(0xFF42906A),
-        child: Icon(Icons.refresh),
-        onPressed: (){
-          _fetchData();
-          setState(() {
-            updatedAt = DateTime.now();
-            updatedAtString = DateFormat('dd/MM/yyyy hh:mm:ss').format(updatedAt);
-          });
-        },
+            Expanded(
+              child: displayCards.length == 0
+              ? Center(child: Text('Nothing to display'))
+              : ListView.builder(
+                itemCount: displayCards.length,
+                itemBuilder: (_, index) {
+                  return _buildUI(displayCards[index].done, displayCards[index].target);
+                }
+              ),
+            ),
+          ],
+        ),
+        floatingActionButton: FloatingActionButton(
+          backgroundColor: Color(0xFF42906A),
+          child: Icon(Icons.refresh),
+          onPressed: (){
+            _fetchData();
+            setState(() {
+              updatedAt = DateTime.now();
+              updatedAtString = DateFormat('dd/MM/yyyy hh:mm:ss').format(updatedAt);
+            });
+          },
+        ),
       ),
     );
   }

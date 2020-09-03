@@ -36,8 +36,12 @@ dependencies:
   intl: ^0.16.1
   provider: ^4.3.1
   pdf: ^1.9.0
+  flutter_pdfview: ^1.0.3+3
+  permission_handler: 4.4.0
   path_provider: ^1.6.11
-  flutter_full_pdf_viewer: ^1.0.6
+  responsive_builder: ^0.3.0
+  app_settings: ^4.0.3
+  share: ^0.6.5
 
 dev_dependencies:
   flutter_test:

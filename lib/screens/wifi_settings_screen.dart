@@ -6,6 +6,8 @@ import 'package:tenupproductioncounter/widgets/rounded_button.dart';
 import 'dart:async';
 import 'dart:convert' show utf8;
 import 'package:flutter_blue/flutter_blue.dart';
+import 'package:app_settings/app_settings.dart';
+import 'package:tenupproductioncounter/screens/welcome_screen.dart';
 
 class WifiSettingsScreen extends StatefulWidget {
   static const String id = 'wifi_settings_screen';
@@ -32,10 +34,40 @@ class _WifiSettingsScreenState extends State<WifiSettingsScreen> {
   @override
   void initState() {
     super.initState();
-    startScan();
+    FlutterBlue.instance.state.listen((state) {
+      if (state == BluetoothState.off) {
+        _alertUser(
+          'Alert',
+          'Turn your bluetooth on!',
+          () {
+            AppSettings.openBluetoothSettings();
+            Navigator.pop(context);
+          },
+        );
+      } else if (state == BluetoothState.on) {
+        startScan();
+      }
+    });
   }
 
-
+  _alertUser(String title, String message, Function onPressed) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: new Text(title),
+          content: new Text(message),
+          actions: <Widget>[
+            // usually buttons at the bottom of the dialog
+            new FlatButton(
+              child: new Text("ok"),
+              onPressed: onPressed,
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   startScan() {
     setState(() {
@@ -114,7 +146,6 @@ class _WifiSettingsScreenState extends State<WifiSettingsScreen> {
     if (targetCharacteristic == null) {
       return;
     }
-
     List<int> bytes = utf8.encode(data);
     await targetCharacteristic.write(bytes);
   }
@@ -127,10 +158,16 @@ class _WifiSettingsScreenState extends State<WifiSettingsScreen> {
   }
 
   submitAction() {
-    var wifiDATA = '${wifiNameController.text},${wifiPasswordController.text}';
+    var wifiDATA = '${wifiNameController.value.text},${wifiPasswordController.value.text}';
     writeData(wifiDATA);
     targetDevice.disconnect();
-    Navigator.pop(context);
+    _alertUser(
+      'Success',
+      'SSID and Password updated!!',
+      () {
+        Navigator.pushNamed(context, WelcomeScreen.id);
+      },
+    );
   }
 
   TextEditingController wifiNameController = TextEditingController();
@@ -138,63 +175,66 @@ class _WifiSettingsScreenState extends State<WifiSettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
     return Scaffold(
-        resizeToAvoidBottomInset: false,
-        body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(32.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CustomLogo(
-                  name: connectionText,
-                ),
-                SizedBox(
-                  height: 48.0,
-                ),
-                targetCharacteristic == null
-              ? Text(
-                  'Waiting...',
-                  style: TextStyle(
-                    color: Color(0xFFE42426),
-                    fontSize: 34.0,
-                  ),
-                )
-              : Column(
-                  children: [
-                    TextField(
-                      textAlign: TextAlign.center,
-                      keyboardType: TextInputType.emailAddress,
-                      controller: wifiNameController,
-                      decoration: kTextFieldDecoration.copyWith(
-                        hintText: 'SSID',
+      key: scaffoldKey,
+      resizeToAvoidBottomInset: false,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(32.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CustomLogo(
+                name: connectionText,
+              ),
+              SizedBox(
+                height: 48.0,
+              ),
+              targetCharacteristic == null
+                  ? Text(
+                      'Waiting...',
+                      style: TextStyle(
+                        color: Color(0xFFE42426),
+                        fontSize: 34.0,
                       ),
-                    ),
-                    SizedBox(
-                      height: 48.0,
-                    ),
-                    TextField(
-                      textAlign: TextAlign.center,
-                      keyboardType: TextInputType.emailAddress,
-                      obscureText: true,
-                      controller: wifiPasswordController,
-                      decoration: kTextFieldDecoration.copyWith(
-                        hintText: 'Password',
-                      ),
-                    ),
-                    SizedBox(
-                      height: 48.0,
-                    ),
-                    RoundedButton(
-                      color: Colors.lightBlueAccent,
-                      buttonName: 'Send',
-                      onPressed: submitAction,
                     )
-                  ],
-                ),
-              ],
-            ),
+                  : Column(
+                      children: [
+                        TextField(
+                          textAlign: TextAlign.center,
+                          keyboardType: TextInputType.emailAddress,
+                          controller: wifiNameController,
+                          decoration: kTextFieldDecoration.copyWith(
+                            hintText: 'SSID',
+                          ),
+                        ),
+                        SizedBox(
+                          height: 48.0,
+                        ),
+                        TextField(
+                          textAlign: TextAlign.center,
+                          keyboardType: TextInputType.emailAddress,
+                          obscureText: true,
+                          controller: wifiPasswordController,
+                          decoration: kTextFieldDecoration.copyWith(
+                            hintText: 'Password',
+                          ),
+                        ),
+                        SizedBox(
+                          height: 48.0,
+                        ),
+                        RoundedButton(
+                          color: Colors.lightBlueAccent,
+                          buttonName: 'Send',
+                          onPressed: submitAction,
+                        )
+                      ],
+                    ),
+            ],
           ),
-        ));
+        ),
+      ),
+    );
   }
 }

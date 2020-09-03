@@ -16,8 +16,30 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     return Scaffold(
       body: SafeArea(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.settings),
+                        iconSize: 40,
+                        onPressed: (){
+                          Navigator.pushNamed(context, WifiSettingsScreen.id);
+                        },
+                      ),
+                      Text('WIFI'),
+                      Text('Settings')
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 120),
             Text(
               'Smart Production Counter',
               textAlign: TextAlign.center,
@@ -36,13 +58,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 Navigator.pushNamed(context, LoginScreen.id);
               },
             ),
-            RoundedButton(
-              color: Colors.blueAccent,
-              buttonName: 'Wifi-Settings',
-              onPressed: () {
-                Navigator.pushNamed(context, WifiSettingsScreen.id);
-              },
-            )
           ],
         ),
       ),

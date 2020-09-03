@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:tenupproductioncounter/screens/get_report_screen.dart';
 import 'package:tenupproductioncounter/screens/shift_settings_screen.dart';
+import 'package:tenupproductioncounter/screens/welcome_screen.dart';
 import 'package:tenupproductioncounter/widgets/option_tile.dart';
 import 'package:tenupproductioncounter/screens/set_target_screen.dart';
 
@@ -69,10 +70,7 @@ class _AppDrawerState extends State<AppDrawer> {
               OptionTile(
                 onTap: () {
                   _auth.signOut();
-                  int count = 0;
-                  Navigator.popUntil(context, (route) {
-                    return count++ == 3;
-                  });
+                  Navigator.pushNamed(context, WelcomeScreen.id);
                 },
                 optionName: 'LogOut',
               )
