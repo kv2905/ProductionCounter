@@ -7,11 +7,10 @@ import 'package:path_provider/path_provider.dart';
 import 'package:tenupproductioncounter/constants.dart';
 import 'package:tenupproductioncounter/models/shift.dart';
 import 'package:tenupproductioncounter/screens/dashboard.dart';
-import 'package:tenupproductioncounter/screens/pdf_preview_screen.dart';
+import 'package:tenupproductioncounter/screens/report_preview_screen.dart';
 import 'package:tenupproductioncounter/widgets/rounded_button.dart';
 import 'package:intl/intl.dart';
 import 'package:tenupproductioncounter/widgets/date_input_field.dart';
-import 'package:pdf/widgets.dart' as pw;
 
 class GetReportScreen extends StatefulWidget {
   static const String id = 'get_report_screen';
@@ -20,14 +19,30 @@ class GetReportScreen extends StatefulWidget {
 }
 
 class _GetReportScreenState extends State<GetReportScreen> {
-  String line, shiftName = 'Default', from = 'from', to = 'to';
+  String line,
+      shiftName = 'All',
+      from = 'from',
+      to = 'to',
+      startTime,
+      endTime,
+      interval;
   List<String> lines = ['All'];
-  List<String> shiftNames = ['Default'];
+  List<String> shiftNames = ['All'];
+  List<String> modes = [
+    'At interval of 1 minute',
+    'At interval of 5 minute',
+    'At interval of 10 minute',
+    'At interval of 30 minute',
+    'At interval of 60 minute',
+    'At interval of 120 minute',
+    'None'
+  ];
+  int mode = 0;
+  String modeName = 'None', startCount, endCount, maxCount;
   List<Shift> shifts;
   Shift shift;
   DateTime _fromDate, _toDate;
   bool isLoading;
-  final pdf = pw.Document();
   final dbRef = FirebaseDatabase.instance.reference().child('Company1');
 
   List<List<String>> _report = [];
@@ -51,10 +66,10 @@ class _GetReportScreenState extends State<GetReportScreen> {
 
   _getShifts(String line) async {
     setState(() {
-      shiftNames = ['Default'];
+      shiftNames = ['All'];
       shifts = [];
     });
-    if(line == 'All') {
+    if (line == 'All') {
       return;
     }
     await dbRef.child(line).child('shifts').once().then((DataSnapshot snap) {
@@ -98,29 +113,31 @@ class _GetReportScreenState extends State<GetReportScreen> {
       });
     });
 
-    for(String element in offlineEncoded) {
+    for (String element in offlineEncoded) {
       final offlineDecoded = base64Decode(element);
       var file = File('$documentPath/offline_report.txt');
       file.writeAsBytesSync(offlineDecoded);
-      await file.readAsString().then((value){
+      await file.readAsString().then((value) {
         List<String> data = value.split('\n');
         data.forEach((entry) {
           List<String> entries = entry.split(',');
-          if(entries.length == 4) {
+          if (entries.length == 4) {
             String countString = entries[1];
             String timeString = entries[2];
             String dateString = entries[3];
             DateTime date = DateTime.parse(dateString);
-            if((date.isAfter(_fromDate) || date.isAtSameMomentAs(_fromDate)) && (date.isBefore(_toDate) || date.isAtSameMomentAs(_toDate))) {
-              if(shift == null && int.parse(countString) >= 0) {
+            if ((date.isAfter(_fromDate) || date.isAtSameMomentAs(_fromDate)) &&
+                (date.isBefore(_toDate) || date.isAtSameMomentAs(_toDate))) {
+              if (shift == null && int.parse(countString) >= 0) {
                 temp.add([dateString, timeString, countString]);
-              }
-              else {
-                TimeOfDay time = TimeOfDay(hour:int.parse(timeString.split(":")[0]), minute: int.parse(timeString.split(":")[1]));
-                int t1 = shift.startTime.hour*60 + shift.startTime.minute;
-                int t = time.hour*60 + time.minute;
-                int t2 = shift.endTime.hour*60 + shift.endTime.minute;
-                if(t1 <= t && t <= t2 && int.parse(countString) >= 0) {
+              } else {
+                TimeOfDay time = TimeOfDay(
+                    hour: int.parse(timeString.split(":")[0]),
+                    minute: int.parse(timeString.split(":")[1]));
+                int t1 = shift.startTime.hour * 60 + shift.startTime.minute;
+                int t = time.hour * 60 + time.minute;
+                int t2 = shift.endTime.hour * 60 + shift.endTime.minute;
+                if (t1 <= t && t <= t2 && int.parse(countString) >= 0) {
                   temp.add([dateString, timeString, countString]);
                 }
               }
@@ -134,29 +151,41 @@ class _GetReportScreenState extends State<GetReportScreen> {
     return temp;
   }
 
-
   Future<List<List<String>>> getReport() async {
     List<List<String>> temp = [];
 
-    if(line != 'All') {
+    if (line != 'All') {
       await dbRef.child(line).child('data').once().then((DataSnapshot snap) {
         Map<dynamic, dynamic> days = snap.value;
         days.values.forEach((element) {
           Map<dynamic, dynamic> entries = element;
           entries.forEach((key, value) {
-            if(value['date'] != null && value['time'] != null && value['count'] != null) {
+            if (value['date'] != null &&
+                value['time'] != null &&
+                value['count'] != null) {
               DateTime date = DateTime.parse(value['date']);
-              if((date.isAfter(_fromDate) || date.isAtSameMomentAs(_fromDate)) && (date.isBefore(_toDate) || date.isAtSameMomentAs(_toDate))) {
-                if(shift == null) {
-                  temp.add([value['date'], value['time'], value['count'].toString()]);
-                }
-                else {
-                  TimeOfDay time = TimeOfDay(hour:int.parse(value['time'].split(":")[0]), minute: int.parse(value['time'].split(":")[1]));
-                  int t1 = shift.startTime.hour*60 + shift.startTime.minute;
-                  int t = time.hour*60 + time.minute;
-                  int t2 = shift.endTime.hour*60 + shift.endTime.minute;
-                  if(t1 <= t && t <= t2) {
-                    temp.add([value['date'], value['time'], value['count'].toString()]);
+              if ((date.isAfter(_fromDate) ||
+                      date.isAtSameMomentAs(_fromDate)) &&
+                  (date.isBefore(_toDate) || date.isAtSameMomentAs(_toDate))) {
+                if (shift == null) {
+                  temp.add([
+                    value['date'],
+                    value['time'],
+                    value['count'].toString()
+                  ]);
+                } else {
+                  TimeOfDay time = TimeOfDay(
+                      hour: int.parse(value['time'].split(":")[0]),
+                      minute: int.parse(value['time'].split(":")[1]));
+                  int t1 = shift.startTime.hour * 60 + shift.startTime.minute;
+                  int t = time.hour * 60 + time.minute;
+                  int t2 = shift.endTime.hour * 60 + shift.endTime.minute;
+                  if (t1 <= t && t <= t2) {
+                    temp.add([
+                      value['date'],
+                      value['time'],
+                      value['count'].toString()
+                    ]);
                   }
                 }
               }
@@ -165,26 +194,43 @@ class _GetReportScreenState extends State<GetReportScreen> {
         });
       });
     } else {
-      for(int i=1; i<lines.length; i++) {
-        await dbRef.child('line$i').child('data').once().then((DataSnapshot snap) {
+      for (int i = 1; i < lines.length; i++) {
+        await dbRef
+            .child('line$i')
+            .child('data')
+            .once()
+            .then((DataSnapshot snap) {
           Map<dynamic, dynamic> days = snap.value;
           days.values.forEach((element) {
             Map<dynamic, dynamic> entries = element;
             entries.forEach((key, value) {
-              if(value['date'] != null && value['time'] != null && value['count'] != null) {
+              if (value['date'] != null &&
+                  value['time'] != null &&
+                  value['count'] != null) {
                 DateTime date = DateTime.parse(value['date']);
-                if(date.isAfter(_fromDate) && date.isBefore(_toDate)) {
-                  if(shift == null) {
-                    temp.add([value['date'], value['time'], value['count'].toString()]);
-                  }
-                  else {
-                    TimeOfDay time = TimeOfDay(hour:int.parse(value['time'].split(":")[0]), minute: int.parse(value['time'].split(":")[1]));
-                    double t1 = (shift.startTime.hour + shift.startTime.minute)/60.0;
-                    double t = (time.hour + time.minute)/60.0;
-                    double t2 = (shift.endTime.hour + shift.endTime.minute)/60.0;
+                if (date.isAfter(_fromDate) && date.isBefore(_toDate)) {
+                  if (shift == null) {
+                    temp.add([
+                      value['date'],
+                      value['time'],
+                      value['count'].toString()
+                    ]);
+                  } else {
+                    TimeOfDay time = TimeOfDay(
+                        hour: int.parse(value['time'].split(":")[0]),
+                        minute: int.parse(value['time'].split(":")[1]));
+                    double t1 =
+                        (shift.startTime.hour + shift.startTime.minute) / 60.0;
+                    double t = (time.hour + time.minute) / 60.0;
+                    double t2 =
+                        (shift.endTime.hour + shift.endTime.minute) / 60.0;
 
-                    if(t1 <= t && t <= t2) {
-                      temp.add([value['date'], value['time'], value['count'].toString()]);
+                    if (t1 <= t && t <= t2) {
+                      temp.add([
+                        value['date'],
+                        value['time'],
+                        value['count'].toString()
+                      ]);
                     }
                   }
                 }
@@ -222,48 +268,135 @@ class _GetReportScreenState extends State<GetReportScreen> {
     List<List<String>> temp = await getReport();
     List<List<String>> offlineReport = await getOfflineReport();
     temp.addAll(offlineReport);
-    if(temp.length > 0) {
+    if (temp.length > 0) {
       temp.sort((e1, e2) {
         DateTime d1 = DateTime.parse(e1[0]);
         DateTime d2 = DateTime.parse(e2[0]);
         var r = d1.compareTo(d2);
-        if(r != 0) return r;
+        if (r != 0) return r;
         var l1 = e1[1].split(':');
         var l2 = e2[1].split(':');
-        int t1 = int.parse(l1[0])*60*60 + int.parse(l1[1])*60 + int.parse(l1[2]);
-        int t2 = int.parse(l2[0])*60*60 + int.parse(l2[1])*60 + int.parse(l2[2]);
+        int t1 = int.parse(l1[0]) * 60 * 60 +
+            int.parse(l1[1]) * 60 +
+            int.parse(l1[2]);
+        int t2 = int.parse(l2[0]) * 60 * 60 +
+            int.parse(l2[1]) * 60 +
+            int.parse(l2[2]);
         return t1.compareTo(t2);
       });
     }
+
+    List<List<String>> finalReport = [];
+    switch (mode) {
+      case 0:
+        {
+          finalReport = temp;
+        }
+        break;
+      case 1:
+        {
+          for (List<String> entry in temp) {
+            int h = int.parse(entry[1].split(':')[0]);
+            int m = int.parse(entry[1].split(':')[1]);
+            int s = int.parse(entry[1].split(':')[2]);
+            int secs = (h * 60 * 60) + (m * 60) + s;
+            if (secs % 60 == 0) {
+              finalReport.add(entry);
+            }
+          }
+        }
+        break;
+      case 2:
+        {
+          for (List<String> entry in temp) {
+            int h = int.parse(entry[1].split(':')[0]);
+            int m = int.parse(entry[1].split(':')[1]);
+            int s = int.parse(entry[1].split(':')[2]);
+            int secs = (h * 60 * 60) + (m * 60) + s;
+            if (secs % 300 == 0) {
+              finalReport.add(entry);
+            }
+          }
+        }
+        break;
+      case 3:
+        {
+          for (List<String> entry in temp) {
+            int h = int.parse(entry[1].split(':')[0]);
+            int m = int.parse(entry[1].split(':')[1]);
+            int s = int.parse(entry[1].split(':')[2]);
+            int secs = (h * 60 * 60) + (m * 60) + s;
+            if (secs % 600 == 0) {
+              finalReport.add(entry);
+            }
+          }
+        }
+        break;
+      case 4:
+        {
+          for (List<String> entry in temp) {
+            int h = int.parse(entry[1].split(':')[0]);
+            int m = int.parse(entry[1].split(':')[1]);
+            int s = int.parse(entry[1].split(':')[2]);
+            int secs = (h * 60 * 60) + (m * 60) + s;
+            if (secs % 1800 == 0) {
+              finalReport.add(entry);
+            }
+          }
+        }
+        break;
+      case 5:
+        {
+          for (List<String> entry in temp) {
+            int h = int.parse(entry[1].split(':')[0]);
+            int m = int.parse(entry[1].split(':')[1]);
+            int s = int.parse(entry[1].split(':')[2]);
+            int secs = (h * 60 * 60) + (m * 60) + s;
+            if (secs % 3600 == 0) {
+              finalReport.add(entry);
+            }
+          }
+        }
+        break;
+      case 6:
+        {
+          for (List<String> entry in temp) {
+            int h = int.parse(entry[1].split(':')[0]);
+            int m = int.parse(entry[1].split(':')[1]);
+            int s = int.parse(entry[1].split(':')[2]);
+            int secs = (h * 60 * 60) + (m * 60) + s;
+            if (secs % 7200 == 0) {
+              finalReport.add(entry);
+            }
+          }
+        }
+        break;
+    }
     setState(() {
-      _report.addAll(temp);
-      _report.insert(0, ['Date', 'Time', 'Count']);
+      startCount = finalReport.isEmpty ? '0' : finalReport[0][2];
+      endCount = finalReport.isEmpty ? '0' : finalReport[finalReport.length - 1][2];
+      maxCount = finalReport.isEmpty ? '0' : findMaxCount(finalReport).toString();
+      startTime = finalReport.isEmpty ? '00:00' : finalReport[0][1];
+      endTime = finalReport.isEmpty ? '00:00' : finalReport[finalReport.length - 1][1];
+      interval = modeName == 'None'
+          ? '5 seconds'
+          : (modeName.split(' ')[3] + ' ' + modeName.split(' ')[4]);
+    });
+    print(finalReport);
+    setState(() {
+      _report.addAll(finalReport);
     });
   }
 
-  _writeOnPdf(List<List<String>> list) {
-    pdf.addPage(
-      pw.MultiPage(
-        build: (pw.Context context) {
-          return <pw.Widget>[
-            pw.Header(
-              level: 0,
-              child: pw.Text('Production Counter Report',
-                  style: pw.TextStyle(fontSize: 20),
-              ),
-            ),
-            pw.Table.fromTextArray(data: list),
-          ];
-        },
-      ),
-    );
-  }
-
-  Future _savePdf() async {
-    Directory documentDirectory = await getApplicationDocumentsDirectory();
-    String documentPath = documentDirectory.path;
-    File file = File('$documentPath/report.pdf');
-    file.writeAsBytesSync(pdf.save());
+  int findMaxCount(List<List<String>> list) {
+    int max = 0;
+    for (int i = 0; i < list.length; i++) {
+      int count = int.parse(list[i][2]);
+      if (count > max) {
+        max = count;
+      }
+    }
+    return max;
   }
 
   @override
@@ -308,7 +441,8 @@ class _GetReportScreenState extends State<GetReportScreen> {
                         });
                         _getShifts(line);
                       },
-                      items: lines.map<DropdownMenuItem<String>>((String value) {
+                      items:
+                          lines.map<DropdownMenuItem<String>>((String value) {
                         return DropdownMenuItem<String>(
                           value: value,
                           child: Text(value),
@@ -334,30 +468,108 @@ class _GetReportScreenState extends State<GetReportScreen> {
                         setState(() {
                           shiftName = newValue;
                         });
-                        if(newValue == 'Default') {
+                        if (newValue == 'All') {
                           setState(() {
                             shift = null;
                           });
-                        }
-                        else {
-                          if(shifts != null) {
-                            for(Shift s in shifts) {
-                              if(s.name == newValue) {
+                        } else {
+                          if (shifts != null) {
+                            for (Shift s in shifts) {
+                              if (s.name == newValue) {
                                 setState(() {
                                   shift = s;
                                 });
                               }
                             }
                             print(shift.endTime);
-                          }
-                          else{
+                          } else {
                             setState(() {
                               shift = null;
                             });
                           }
                         }
                       },
-                      items: shiftNames.map<DropdownMenuItem<String>>((String value) {
+                      items: shiftNames
+                          .map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
+                    ),
+                    SizedBox(
+                      height: 25,
+                    ),
+                    DropdownButton<String>(
+                      value: modeName,
+                      isExpanded: true,
+                      icon: Icon(Icons.arrow_drop_down),
+                      iconSize: 24,
+                      elevation: 16,
+                      style: TextStyle(color: Colors.white70, fontSize: 25.0),
+                      underline: Container(
+                        height: 2,
+                        width: 200.0,
+                        color: Colors.lightBlueAccent,
+                      ),
+                      onChanged: (String newValue) {
+                        setState(() {
+                          modeName = newValue;
+                        });
+                        switch (newValue) {
+                          case 'None':
+                            {
+                              setState(() {
+                                mode = 0;
+                              });
+                            }
+                            break;
+                          case 'At interval of 1 minute':
+                            {
+                              setState(() {
+                                mode = 1;
+                              });
+                            }
+                            break;
+                          case 'At interval of 5 minute':
+                            {
+                              setState(() {
+                                mode = 2;
+                              });
+                            }
+                            break;
+                          case 'At interval of 10 minute':
+                            {
+                              setState(() {
+                                mode = 3;
+                              });
+                            }
+                            break;
+                          case 'At interval of 30 minute':
+                            {
+                              setState(() {
+                                mode = 4;
+                              });
+                            }
+                            break;
+                          case 'At interval of 60 minute':
+                            {
+                              setState(() {
+                                mode = 5;
+                              });
+                            }
+                            break;
+                          case 'At interval of 120 minute':
+                            {
+                              setState(() {
+                                mode = 6;
+                              });
+                            }
+                            break;
+                        }
+                      },
+                      items:
+                          modes.map<DropdownMenuItem<String>>((String value) {
                         return DropdownMenuItem<String>(
                           value: value,
                           child: Text(value),
@@ -417,34 +629,37 @@ class _GetReportScreenState extends State<GetReportScreen> {
                       buttonName: 'Generate',
                       color: Colors.lightBlueAccent,
                       onPressed: () async {
-                        if(_fromDate == null || _toDate == null) {
+                        if (_fromDate == null || _toDate == null) {
                           _alertUser('Alert', 'Pick from and to dates');
                           return;
                         }
-                        if(_fromDate.isAfter(_toDate)) {
-                          _alertUser('Alert', 'From date must be before or on the To date');
+                        if (_fromDate.isAfter(_toDate)) {
+                          _alertUser('Alert',
+                              'From date must be before or on the To date');
                           return;
                         }
                         setState(() {
                           isLoading = true;
                         });
                         await _generateReport();
-                        _writeOnPdf(_report);
-                        await _savePdf();
-                        Directory documentDirectory =
-                            await getApplicationDocumentsDirectory();
-                        String documentPath = documentDirectory.path;
-                        String fullPath = '$documentPath/report.pdf';
                         setState(() {
                           isLoading = false;
                         });
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => SafeArea(
-                              child: PdfPreviewScreen(
-                                path: fullPath,
-                              ),
+                            builder: (context) => ReportPreviewScreen(
+                              line: line,
+                              shift: shiftName,
+                              interval: interval,
+                              maxCount: maxCount,
+                              fromDate: from,
+                              toDate: to,
+                              report: _report,
+                              startCount: startCount,
+                              startTime: startTime,
+                              endCount: endCount,
+                              endTime: endTime,
                             ),
                           ),
                         );
@@ -457,14 +672,3 @@ class _GetReportScreenState extends State<GetReportScreen> {
     );
   }
 }
-
-
-
-
-
-
-
-
-
-
-

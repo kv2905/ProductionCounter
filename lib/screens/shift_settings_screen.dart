@@ -9,6 +9,7 @@ import 'package:tenupproductioncounter/widgets/rounded_button.dart';
 import 'package:tenupproductioncounter/models/shifts_data.dart';
 import 'package:tenupproductioncounter/widgets/shift_input_form.dart';
 import 'package:tenupproductioncounter/widgets/shift_tile.dart';
+import 'package:tenupproductioncounter/widgets/table_heading.dart';
 
 class ShiftSettingsScreen extends StatefulWidget {
   static const String id = 'shift_setting_screen';
@@ -338,13 +339,4 @@ class _ShiftSettingsScreenState extends State<ShiftSettingsScreen> {
   }
 }
 
-class TableHeading extends StatelessWidget {
-  TableHeading({@required this.heading, this.flex});
-  final Text heading;
-  final int flex;
 
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(flex: flex, child: heading);
-  }
-}
