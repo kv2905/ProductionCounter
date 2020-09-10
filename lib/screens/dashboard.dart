@@ -77,14 +77,8 @@ class _DashboardState extends State<Dashboard> {
         appBar: AppBar(
           title: Text('Dashboard'),
           centerTitle: true,
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back_ios, size: 15),
-            onPressed: () {
-              Navigator.pushNamed(context, WelcomeScreen.id);
-            },
-          ),
         ),
-        endDrawer: AppDrawer(),
+        drawer: AppDrawer(),
         body: Column(
           children: [
             Container(

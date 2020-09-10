@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:tenupproductioncounter/models/shifts_data.dart';
 import 'package:tenupproductioncounter/screens/dashboard.dart';
 import 'package:tenupproductioncounter/screens/get_report_screen.dart';
+import 'package:tenupproductioncounter/screens/root_page.dart';
 import 'package:tenupproductioncounter/screens/set_target_screen.dart';
 import 'package:tenupproductioncounter/screens/shift_settings_screen.dart';
 import 'package:tenupproductioncounter/screens/welcome_screen.dart';
@@ -21,8 +22,9 @@ class MyApp extends StatelessWidget {
       title: 'Smart Production Counter',
       debugShowCheckedModeBanner: false,
       theme: ThemeData.dark(),
-      initialRoute: WelcomeScreen.id,
+      initialRoute: RootPage.id,
       routes: {
+        RootPage.id: (context) => RootPage(),
         WelcomeScreen.id: (context) => WelcomeScreen(),
         LoginScreen.id: (context) => LoginScreen(),
         WifiSettingsScreen.id: (context) => WifiSettingsScreen(),

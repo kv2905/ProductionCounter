@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 import 'package:tenupproductioncounter/widgets/custom_logo.dart';
 import 'package:tenupproductioncounter/constants.dart';
 import 'package:tenupproductioncounter/widgets/rounded_button.dart';
@@ -27,7 +28,7 @@ class _LoginScreenState extends State<LoginScreen> {
         inAsyncCall: showSpinner,
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.all(24.0),
+            padding: getValueForScreenType<bool>(context: context, desktop: true, mobile: false) ? EdgeInsets.symmetric(vertical: 24, horizontal: 512) : EdgeInsets.all(24.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
