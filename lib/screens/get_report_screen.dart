@@ -268,6 +268,8 @@ class _GetReportScreenState extends State<GetReportScreen> {
     List<List<String>> temp = await getReport();
     List<List<String>> offlineReport = await getOfflineReport();
     temp.addAll(offlineReport);
+
+    //sort temp to get sorted report
     if (temp.length > 0) {
       temp.sort((e1, e2) {
         DateTime d1 = DateTime.parse(e1[0]);
@@ -286,7 +288,21 @@ class _GetReportScreenState extends State<GetReportScreen> {
       });
     }
 
+    //generate final report as per time interval
     List<List<String>> finalReport = [];
+    int initSecs = 0;
+    Set<int> timeSet = Set();
+//    if(temp.length == 0) {
+//      initSecs = 0;
+//    } else {
+//      int h = int.parse(temp[0][1].split(':')[0]);
+//      int m = int.parse(temp[0][1].split(':')[0]);
+//      int s = int.parse(temp[0][1].split(':')[0]);
+//      initSecs = (h*60*60) + (m*60) + 60;
+//    }
+//    if(temp.length > 0) {
+//      finalReport.add(temp[0]);
+//    }
     switch (mode) {
       case 0:
         {
@@ -295,78 +311,96 @@ class _GetReportScreenState extends State<GetReportScreen> {
         break;
       case 1:
         {
+          int d = 60;
           for (List<String> entry in temp) {
             int h = int.parse(entry[1].split(':')[0]);
             int m = int.parse(entry[1].split(':')[1]);
-            int s = int.parse(entry[1].split(':')[2]);
-            int secs = (h * 60 * 60) + (m * 60) + s;
-            if (secs % 60 == 0) {
-              finalReport.add(entry);
+            int secs = (h * 60 * 60) + (m * 60);
+            if ((secs - initSecs) % d == 0 && (secs - initSecs) / d >= 0) {
+              if(!timeSet.contains(secs)) {
+                finalReport.add(entry);
+                timeSet.add(secs);
+              }
             }
           }
         }
         break;
       case 2:
         {
+          int d = 300;
           for (List<String> entry in temp) {
             int h = int.parse(entry[1].split(':')[0]);
             int m = int.parse(entry[1].split(':')[1]);
-            int s = int.parse(entry[1].split(':')[2]);
-            int secs = (h * 60 * 60) + (m * 60) + s;
-            if (secs % 300 == 0) {
-              finalReport.add(entry);
+            int secs = (h * 60 * 60) + (m * 60);
+            if ((secs - initSecs) % d == 0 && (secs - initSecs) / d >= 0) {
+              if(!timeSet.contains(secs)) {
+                finalReport.add(entry);
+                timeSet.add(secs);
+              }
             }
           }
         }
         break;
       case 3:
         {
+          int d = 600;
           for (List<String> entry in temp) {
             int h = int.parse(entry[1].split(':')[0]);
             int m = int.parse(entry[1].split(':')[1]);
-            int s = int.parse(entry[1].split(':')[2]);
-            int secs = (h * 60 * 60) + (m * 60) + s;
-            if (secs % 600 == 0) {
-              finalReport.add(entry);
+            int secs = (h * 60 * 60) + (m * 60);
+            if ((secs - initSecs) % d == 0 && (secs - initSecs) / d >= 0) {
+              if(!timeSet.contains(secs)) {
+                finalReport.add(entry);
+                timeSet.add(secs);
+              }
             }
           }
         }
         break;
       case 4:
         {
+          int d = 1800;
           for (List<String> entry in temp) {
             int h = int.parse(entry[1].split(':')[0]);
             int m = int.parse(entry[1].split(':')[1]);
-            int s = int.parse(entry[1].split(':')[2]);
-            int secs = (h * 60 * 60) + (m * 60) + s;
-            if (secs % 1800 == 0) {
-              finalReport.add(entry);
+            int secs = (h * 60 * 60) + (m * 60);
+            if ((secs - initSecs) % d == 0 && (secs - initSecs) / d >= 0) {
+              if(!timeSet.contains(secs)) {
+                finalReport.add(entry);
+                timeSet.add(secs);
+              }
             }
           }
         }
         break;
       case 5:
         {
+          int d = 3600;
           for (List<String> entry in temp) {
             int h = int.parse(entry[1].split(':')[0]);
             int m = int.parse(entry[1].split(':')[1]);
-            int s = int.parse(entry[1].split(':')[2]);
-            int secs = (h * 60 * 60) + (m * 60) + s;
-            if (secs % 3600 == 0) {
-              finalReport.add(entry);
+            int secs = (h * 60 * 60) + (m * 60);
+            if ((secs - initSecs) % d == 0 && (secs - initSecs) / d >= 0) {
+              if(!timeSet.contains(secs)) {
+                finalReport.add(entry);
+                timeSet.add(secs);
+              }
             }
           }
         }
         break;
       case 6:
         {
+          int d = 7200;
           for (List<String> entry in temp) {
             int h = int.parse(entry[1].split(':')[0]);
             int m = int.parse(entry[1].split(':')[1]);
-            int s = int.parse(entry[1].split(':')[2]);
-            int secs = (h * 60 * 60) + (m * 60) + s;
-            if (secs % 7200 == 0) {
-              finalReport.add(entry);
+            int secs = (h * 60 * 60) + (m * 60);
+            if ((secs - initSecs) % d == 0 && (secs - initSecs) / d >= 0) {
+              if(!timeSet.contains(secs)) {
+                finalReport.add(entry);
+                timeSet.add(secs);
+              }
             }
           }
         }
@@ -382,7 +416,7 @@ class _GetReportScreenState extends State<GetReportScreen> {
           ? '5 seconds'
           : (modeName.split(' ')[3] + ' ' + modeName.split(' ')[4]);
     });
-    print(finalReport);
+    print(finalReport.length);
     setState(() {
       _report.addAll(finalReport);
     });
